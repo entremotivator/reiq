@@ -10,10 +10,13 @@ st.sidebar.image("prop.png", use_column_width=True)
 st.sidebar.title("Navigation")
 selection = st.sidebar.radio("Go to", ["Input", "Report"])
 
+# Navigation logic
 if selection == "Input":
-    import pages.input  # Import the input page
-    pages.input.run()    # Call the run function in the input page
+    # Assuming 'input.py' is located in a folder named 'pages'
+    import pages.input as input_page  # Import the input page
+    input_page.run()  # Call the run function in the input page
 
 elif selection == "Report":
-    import pages.report   # Import the report page
-    pages.report.run()    # Call the run function in the report page
+    # Assuming 'report.py' is located in a folder named 'pages'
+    import pages.report as report_page  # Import the report page
+    report_page.run()  # Call the run function in the report page
