@@ -17,7 +17,7 @@ def calculate_metrics(property_data):
     total_units = property_data["total_units"]
 
     # Calculating financial metrics
-    annual_cash_flow = gross_rental_income - operating_expenses  # Assuming cash flow calculation
+    annual_cash_flow = gross_rental_income - operating_expenses
     cash_on_cash_return = (annual_cash_flow / cash_invested) * 100 if cash_invested > 0 else 0
     cap_rate = (noi / price) * 100 if price > 0 else 0
     dscr = (noi / total_debt_service) if total_debt_service > 0 else 0
@@ -70,9 +70,10 @@ def generate_report(metrics, property_details):
     """
     return report
 
-def export_report_as_pdf(report, filename="Investment_Report.pdf"):
+def export_report_as_pdf(report):
     """Export the report as a PDF file using reportlab."""
-    pdf = canvas.Canvas(filename, pagesize=letter)
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
     
     # Title
@@ -89,6 +90,8 @@ def export_report_as_pdf(report, filename="Investment_Report.pdf"):
         y_position -= 15  # Move down for the next line
 
     pdf.save()
+    buffer.seek(0)
+    return buffer
 
 def export_report_as_csv(property_details, metrics, filename="Investment_Report.csv"):
     """Export the report as a CSV file."""
@@ -169,7 +172,8 @@ def run():
             export_csv = st.button("Export Report as CSV")
 
             if export_pdf:
-                export_report_as_pdf(report)
+                pdf_buffer = export_report_as_pdf(report)
+                st.download_button("Download PDF", pdf_buffer, "Investment_Report.pdf", "application/pdf")
                 st.success("Report exported as PDF.")
 
             if export_csv:
@@ -179,3 +183,4 @@ def run():
 # Run the Streamlit application
 if __name__ == "__main__":
     run()
+
