@@ -2,3 +2,4 @@ pandas
 numpy
 request
 fpdf2
+reportlab
