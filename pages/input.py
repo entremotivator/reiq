@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 def calculate_metrics(property_data):
     """Calculate various financial metrics based on the provided property data."""
@@ -24,6 +25,7 @@ def calculate_metrics(property_data):
     occupancy_rate = (occupied_units / total_units) * 100 if total_units > 0 else 0
 
     return {
+        "annual_cash_flow": annual_cash_flow,
         "cash_on_cash_return": cash_on_cash_return,
         "cap_rate": cap_rate,
         "dscr": dscr,
@@ -47,6 +49,7 @@ def generate_report(metrics, property_details):
     **Year Built:** {property_details["year_built"]}  
 
     ### Financial Metrics
+    - Cash Flow: ${metrics['annual_cash_flow']:.2f}
     - Cash on Cash Return: {metrics['cash_on_cash_return']:.2f}%
     - Capitalization Rate (Cap Rate): {metrics['cap_rate']:.2f}%
     - Debt Service Coverage Ratio (DSCR): {metrics['dscr']:.2f}
@@ -97,7 +100,7 @@ def run():
             "occupied_units": occupied_units,
             "total_units": total_units,
         }
-        st.success("Property details saved! Navigate to the Report page to generate your report.")
+        st.success("Property details saved! Navigate to the Report section to generate your report.")
 
     # Generate and display the report
     if "property_data" in st.session_state:
@@ -109,6 +112,30 @@ def run():
             st.success("Investment report generated!")
             st.markdown(report)
 
+            # Export report button
+            if st.button("Export Report"):
+                report_df = pd.DataFrame.from_dict(metrics, orient='index', columns=['Value']).reset_index()
+                report_df.columns = ['Metric', 'Value']
+                report_df['Property Address'] = property_data['address']
+                report_df['Price'] = property_data['price']
+                report_df['Square Footage'] = property_data['square_footage']
+                report_df['Bedrooms'] = property_data['bedrooms']
+                report_df['Bathrooms'] = property_data['bathrooms']
+                report_df['Year Built'] = property_data['year_built']
+
+                # Reorder columns
+                report_df = report_df[['Property Address', 'Price', 'Square Footage', 'Bedrooms', 'Bathrooms', 'Year Built', 'Metric', 'Value']]
+                
+                # Save to CSV
+                csv = report_df.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Download Report as CSV",
+                    data=csv,
+                    file_name=f"investment_report_{property_data['address'].replace(' ', '_')}.csv",
+                    mime="text/csv",
+                )
+
 # Run the Streamlit application
 if __name__ == "__main__":
     run()
+
