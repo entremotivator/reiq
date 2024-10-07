@@ -6,12 +6,12 @@ import numpy as np
 # Set page configurations (logo in sidebar and favicon)
 st.set_page_config(
     page_title="AI Real Estate Investment Report",
-    page_icon="/Users/donmenicohudson/Downloads/aipropiq/prop.png",  # Use your 'prop.png' as the favicon
+    page_icon="prop.png",  # Use your 'prop.png' as the favicon
     layout="wide"
 )
 
 # Add logo to the sidebar
-st.sidebar.image("/Users/donmenicohudson/Downloads/aipropiq/prop.png", use_column_width=True)
+st.sidebar.image("prop.png", use_column_width=True)
 
 # Function to calculate real estate investment metrics
 def calculate_metrics(price, noi, cash_invested, annual_cash_flow, gross_rental_income, operating_expenses, total_debt_service, square_footage, occupied_units, total_units):
