@@ -61,7 +61,7 @@ def generate_report(metrics, property_details):
 def run():
     st.title("Enhanced AI Real Estate Investment Report Creator")
 
-    # Property details input with example values
+    # Property details input
     st.header("Property Details")
     address = st.text_input("Property Address", "1234 Example St, Anytown, USA")
     price = st.number_input("Property Price", min_value=0.0, value=350000.00)
@@ -70,11 +70,10 @@ def run():
     bathrooms = st.number_input("Number of Bathrooms", min_value=0.0, step=0.5, value=2.0)
     year_built = st.number_input("Year Built", min_value=1800, max_value=2100, value=1990)
 
-    # Financial details input with example values
+    # Financial details input
     st.header("Financial Details")
     noi = st.number_input("Net Operating Income (NOI)", min_value=0.0, value=30000.00)
     cash_invested = st.number_input("Total Cash Invested", min_value=0.0, value=70000.00)
-    annual_cash_flow = st.number_input("Annual Cash Flow", min_value=0.0, value=15000.00)
     gross_rental_income = st.number_input("Gross Rental Income", min_value=0.0, value=42000.00)
     operating_expenses = st.number_input("Operating Expenses", min_value=0.0, value=12000.00)
     total_debt_service = st.number_input("Total Debt Service", min_value=0.0, value=24000.00)
@@ -92,7 +91,6 @@ def run():
             "year_built": year_built,
             "noi": noi,
             "cash_invested": cash_invested,
-            "annual_cash_flow": annual_cash_flow,
             "gross_rental_income": gross_rental_income,
             "operating_expenses": operating_expenses,
             "total_debt_service": total_debt_service,
@@ -101,11 +99,11 @@ def run():
         }
         st.success("Property details saved! Navigate to the Report page to generate your report.")
 
+    # Generate and display the report
     if "property_data" in st.session_state:
         property_data = st.session_state.property_data
         metrics = calculate_metrics(property_data)
 
-        # Display the report
         if st.button("Generate Investment Report"):
             report = generate_report(metrics, property_data)
             st.success("Investment report generated!")
