@@ -2,4 +2,4 @@ pandas
 numpy
 request
 fpdf2
-reportlab
+reportlab==3.6.13
