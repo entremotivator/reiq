@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import ollama
+
 
 # Set page configurations (logo in sidebar and favicon)
 st.set_page_config(
