@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from fpdf import FPDF
 
 def calculate_metrics(property_data):
     """Calculate various financial metrics based on the provided property data."""
@@ -14,7 +15,6 @@ def calculate_metrics(property_data):
 
     # Calculating financial metrics
     annual_cash_flow = gross_rental_income - operating_expenses  # Assuming cash flow calculation
-
     cash_on_cash_return = (annual_cash_flow / cash_invested) * 100 if cash_invested > 0 else 0
     cap_rate = (noi / price) * 100 if price > 0 else 0
     dscr = (noi / total_debt_service) if total_debt_service > 0 else 0
@@ -49,7 +49,7 @@ def generate_report(metrics, property_details):
     **Year Built:** {property_details["year_built"]}  
 
     ### Financial Metrics
-    - Cash Flow: ${metrics['annual_cash_flow']:.2f}
+    - Annual Cash Flow: ${metrics['annual_cash_flow']:.2f}
     - Cash on Cash Return: {metrics['cash_on_cash_return']:.2f}%
     - Capitalization Rate (Cap Rate): {metrics['cap_rate']:.2f}%
     - Debt Service Coverage Ratio (DSCR): {metrics['dscr']:.2f}
@@ -58,8 +58,48 @@ def generate_report(metrics, property_details):
     - Operating Expense Ratio (OER): {metrics['oer']:.2f}%
     - Return on Investment (ROI): {metrics['roi']:.2f}%
     - Occupancy Rate: {metrics['occupancy_rate']:.2f}%
+
+    ### Property Summary
+    - **Investment Type:** Residential
+    - **Location Quality:** Good (assumed; can be based on user input)
+    - **Potential Appreciation:** 5% (assumed; can be based on user input)
+    - **Market Trends:** Stable (assumed; can be based on user input)
     """
     return report
+
+def export_report_as_pdf(report):
+    """Export the report as a PDF file."""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    for line in report.split('\n'):
+        pdf.cell(200, 10, txt=line, ln=True)
+
+    pdf.output("Investment_Report.pdf")
+
+def export_report_as_csv(property_details, metrics):
+    """Export the report as a CSV file."""
+    data = {
+        "Property Address": property_details["address"],
+        "Price": property_details["price"],
+        "Square Footage": property_details["square_footage"],
+        "Bedrooms": property_details["bedrooms"],
+        "Bathrooms": property_details["bathrooms"],
+        "Year Built": property_details["year_built"],
+        "Annual Cash Flow": metrics['annual_cash_flow'],
+        "Cash on Cash Return (%)": metrics['cash_on_cash_return'],
+        "Cap Rate (%)": metrics['cap_rate'],
+        "DSCR": metrics['dscr'],
+        "Gross Rental Yield (%)": metrics['gross_rental_yield'],
+        "Price per Square Foot": metrics['price_per_sqft'],
+        "Operating Expense Ratio (%)": metrics['oer'],
+        "ROI (%)": metrics['roi'],
+        "Occupancy Rate (%)": metrics['occupancy_rate'],
+    }
+
+    df = pd.DataFrame([data])
+    df.to_csv("Investment_Report.csv", index=False)
 
 def run():
     st.title("Enhanced AI Real Estate Investment Report Creator")
@@ -100,7 +140,7 @@ def run():
             "occupied_units": occupied_units,
             "total_units": total_units,
         }
-        st.success("Property details saved! Navigate to the Report section to generate your report.")
+        st.success("Property details saved! Navigate to the Report page to generate your report.")
 
     # Generate and display the report
     if "property_data" in st.session_state:
@@ -112,30 +152,18 @@ def run():
             st.success("Investment report generated!")
             st.markdown(report)
 
-            # Export report button
-            if st.button("Export Report"):
-                report_df = pd.DataFrame.from_dict(metrics, orient='index', columns=['Value']).reset_index()
-                report_df.columns = ['Metric', 'Value']
-                report_df['Property Address'] = property_data['address']
-                report_df['Price'] = property_data['price']
-                report_df['Square Footage'] = property_data['square_footage']
-                report_df['Bedrooms'] = property_data['bedrooms']
-                report_df['Bathrooms'] = property_data['bathrooms']
-                report_df['Year Built'] = property_data['year_built']
+            # Export options
+            export_pdf = st.button("Export Report as PDF")
+            export_csv = st.button("Export Report as CSV")
 
-                # Reorder columns
-                report_df = report_df[['Property Address', 'Price', 'Square Footage', 'Bedrooms', 'Bathrooms', 'Year Built', 'Metric', 'Value']]
-                
-                # Save to CSV
-                csv = report_df.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="Download Report as CSV",
-                    data=csv,
-                    file_name=f"investment_report_{property_data['address'].replace(' ', '_')}.csv",
-                    mime="text/csv",
-                )
+            if export_pdf:
+                export_report_as_pdf(report)
+                st.success("Report exported as PDF.")
+
+            if export_csv:
+                export_report_as_csv(property_data, metrics)
+                st.success("Report exported as CSV.")
 
 # Run the Streamlit application
 if __name__ == "__main__":
     run()
-
