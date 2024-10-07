@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from weasyprint import HTML
 
 def calculate_metrics(property_data):
     """Calculate various financial metrics based on the provided property data."""
@@ -36,48 +35,60 @@ def calculate_metrics(property_data):
         "occupancy_rate": occupancy_rate,
     }
 
-def export_report_as_pdf(metrics, property_details, filename="Investment_Report.pdf"):
-    """Export the report as a PDF file using WeasyPrint."""
-    html_content = f"""
-    <html>
-    <head>
-        <title>Property Investment Analysis Report</title>
-        <style>
-            body {{ font-family: Arial, sans-serif; }}
-            h1 {{ text-align: center; }}
-            h2 {{ margin-top: 20px; }}
-            table {{ width: 100%; border-collapse: collapse; }}
-            th, td {{ border: 1px solid black; padding: 8px; text-align: left; }}
-        </style>
-    </head>
-    <body>
-        <h1>Property Investment Analysis Report</h1>
-        <h2>Property Details</h2>
-        <p><strong>Property Address:</strong> {property_details['address']}</p>
-        <p><strong>Price:</strong> ${property_details['price']:.2f}</p>
-        <p><strong>Square Footage:</strong> {property_details['square_footage']} sqft</p>
-        <p><strong>Bedrooms:</strong> {property_details['bedrooms']}</p>
-        <p><strong>Bathrooms:</strong> {property_details['bathrooms']}</p>
-        <p><strong>Year Built:</strong> {property_details['year_built']}</p>
+def generate_report(metrics, property_details):
+    """Generate a comprehensive report based on the financial metrics and property details."""
+    report = f"""
+    ## Property Investment Analysis Report
 
-        <h2>Financial Metrics</h2>
-        <table>
-            <tr><th>Metric</th><th>Value</th></tr>
-            <tr><td>Annual Cash Flow</td><td>${metrics['annual_cash_flow']:.2f}</td></tr>
-            <tr><td>Cash on Cash Return</td><td>{metrics['cash_on_cash_return']:.2f}%</td></tr>
-            <tr><td>Cap Rate</td><td>{metrics['cap_rate']:.2f}%</td></tr>
-            <tr><td>DSCR</td><td>{metrics['dscr']:.2f}</td></tr>
-            <tr><td>Gross Rental Yield</td><td>{metrics['gross_rental_yield']:.2f}%</td></tr>
-            <tr><td>Price per Square Foot</td><td>${metrics['price_per_sqft']:.2f}</td></tr>
-            <tr><td>Operating Expense Ratio</td><td>{metrics['oer']:.2f}%</td></tr>
-            <tr><td>ROI</td><td>{metrics['roi']:.2f}%</td></tr>
-            <tr><td>Occupancy Rate</td><td>{metrics['occupancy_rate']:.2f}%</td></tr>
-        </table>
-    </body>
-    </html>
+    **Property Address:** {property_details["address"]}  
+    **Price:** ${property_details["price"]:.2f}  
+    **Square Footage:** {property_details["square_footage"]} sqft  
+    **Bedrooms:** {property_details["bedrooms"]}  
+    **Bathrooms:** {property_details["bathrooms"]}  
+    **Year Built:** {property_details["year_built"]}  
+
+    ### Financial Metrics
+    - Annual Cash Flow: ${metrics['annual_cash_flow']:.2f}
+    - Cash on Cash Return: {metrics['cash_on_cash_return']:.2f}%
+    - Capitalization Rate (Cap Rate): {metrics['cap_rate']:.2f}%
+    - Debt Service Coverage Ratio (DSCR): {metrics['dscr']:.2f}
+    - Gross Rental Yield: {metrics['gross_rental_yield']:.2f}%
+    - Price per Square Foot: ${metrics['price_per_sqft']:.2f}
+    - Operating Expense Ratio (OER): {metrics['oer']:.2f}%
+    - Return on Investment (ROI): {metrics['roi']:.2f}%
+    - Occupancy Rate: {metrics['occupancy_rate']:.2f}%
+
+    ### Property Summary
+    - **Investment Type:** Residential
+    - **Location Quality:** Good (assumed; can be based on user input)
+    - **Potential Appreciation:** 5% (assumed; can be based on user input)
+    - **Market Trends:** Stable (assumed; can be based on user input)
     """
+    return report
 
-    HTML(string=html_content).write_pdf(filename)
+def export_report_as_csv(property_details, metrics, filename="Investment_Report.csv"):
+    """Export the report as a CSV file."""
+    data = {
+        "Property Address": property_details["address"],
+        "Price": property_details["price"],
+        "Square Footage": property_details["square_footage"],
+        "Bedrooms": property_details["bedrooms"],
+        "Bathrooms": property_details["bathrooms"],
+        "Year Built": property_details["year_built"],
+        "Annual Cash Flow": metrics['annual_cash_flow'],
+        "Cash on Cash Return (%)": metrics['cash_on_cash_return'],
+        "Cap Rate (%)": metrics['cap_rate'],
+        "DSCR": metrics['dscr'],
+        "Gross Rental Yield (%)": metrics['gross_rental_yield'],
+        "Price per Square Foot": metrics['price_per_sqft'],
+        "Operating Expense Ratio (%)": metrics['oer'],
+        "ROI (%)": metrics['roi'],
+        "Occupancy Rate (%)": metrics['occupancy_rate'],
+    }
+
+    df = pd.DataFrame([data])
+    df.to_csv(filename, index=False)
+    return filename
 
 def run():
     st.title("Enhanced AI Real Estate Investment Report Creator")
@@ -91,23 +102,49 @@ def run():
     bathrooms = st.number_input("Number of Bathrooms", min_value=0.0, step=0.5, value=2.0)
     year_built = st.number_input("Year Built", min_value=1800, max_value=2100, value=1990)
 
-    # Other input fields for property data (like NOI, etc.) should go here
+    # Financial details input
+    st.header("Financial Details")
+    noi = st.number_input("Net Operating Income (NOI)", min_value=0.0, value=20000.00)
+    cash_invested = st.number_input("Cash Invested", min_value=0.0, value=70000.00)
+    gross_rental_income = st.number_input("Gross Rental Income", min_value=0.0, value=36000.00)
+    operating_expenses = st.number_input("Operating Expenses", min_value=0.0, value=10000.00)
+    total_debt_service = st.number_input("Total Debt Service", min_value=0.0, value=15000.00)
+    occupied_units = st.number_input("Occupied Units", min_value=0, value=1)
+    total_units = st.number_input("Total Units", min_value=1, value=1)
 
     if st.button("Generate Report"):
         property_data = {
+            "price": price,
+            "noi": noi,
+            "cash_invested": cash_invested,
+            "gross_rental_income": gross_rental_income,
+            "operating_expenses": operating_expenses,
+            "total_debt_service": total_debt_service,
+            "occupied_units": occupied_units,
+            "total_units": total_units,
+            "square_footage": square_footage,
+        }
+
+        property_details = {
             "address": address,
             "price": price,
             "square_footage": square_footage,
             "bedrooms": bedrooms,
             "bathrooms": bathrooms,
             "year_built": year_built,
-            # Include other necessary property data
         }
-        
+
         metrics = calculate_metrics(property_data)
-        export_report_as_pdf(metrics, property_data)
-        st.success("Report generated successfully!")
+        report = generate_report(metrics, property_details)
 
-run()
+        st.markdown(report)
 
+        # Export options
+        st.header("Export Options")
+        if st.button("Export Report as CSV"):
+            filename = export_report_as_csv(property_details, metrics)
+            st.success(f"Report exported as CSV successfully! Filename: {filename}")
+
+if __name__ == "__main__":
+    run()
 
