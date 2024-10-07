@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from io import BytesIO
+
 
 def calculate_metrics(property_data):
     """Calculate various financial metrics based on the provided property data."""
