@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from fpdf import FPDF
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 def calculate_metrics(property_data):
     """Calculate various financial metrics based on the provided property data."""
@@ -67,18 +68,27 @@ def generate_report(metrics, property_details):
     """
     return report
 
-def export_report_as_pdf(report):
-    """Export the report as a PDF file."""
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
+def export_report_as_pdf(report, filename="Investment_Report.pdf"):
+    """Export the report as a PDF file using reportlab."""
+    pdf = canvas.Canvas(filename, pagesize=letter)
+    width, height = letter
     
+    # Title
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(30, height - 40, "Property Investment Analysis Report")
+    
+    # Set font for the report body
+    pdf.setFont("Helvetica", 12)
+    
+    # Draw the report content
+    y_position = height - 80
     for line in report.split('\n'):
-        pdf.cell(200, 10, txt=line, ln=True)
+        pdf.drawString(30, y_position, line.strip())
+        y_position -= 15  # Move down for the next line
 
-    pdf.output("Investment_Report.pdf")
+    pdf.save()
 
-def export_report_as_csv(property_details, metrics):
+def export_report_as_csv(property_details, metrics, filename="Investment_Report.csv"):
     """Export the report as a CSV file."""
     data = {
         "Property Address": property_details["address"],
@@ -99,7 +109,7 @@ def export_report_as_csv(property_details, metrics):
     }
 
     df = pd.DataFrame([data])
-    df.to_csv("Investment_Report.csv", index=False)
+    df.to_csv(filename, index=False)
 
 def run():
     st.title("Enhanced AI Real Estate Investment Report Creator")
