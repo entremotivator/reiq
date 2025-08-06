@@ -156,7 +156,7 @@ elif selection == "Manage Properties":
             }
             st.session_state.properties.append(new_property)
             st.success(f"Property at {new_address} has been added.")
-            st.experimental_rerun()
+            st.rerun()
 
 # Footer
 st.sidebar.markdown("---")
