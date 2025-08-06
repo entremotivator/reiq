@@ -103,7 +103,7 @@ if selection == "Home":
     # Add a call-to-action button
     if st.button("Get Started"):
         st.session_state.selection = "Input"
-        st.experimental_rerun()
+        st.rerun()
 
 elif selection == "Input":
     import pages.input as input_page
